@@ -1,0 +1,232 @@
+Hotel Management API Documentation
+=================================
+
+Overview
+--------
+The Hotel Management API provides endpoints to manage hotel and room information for a hotel booking system. It allows clients to retrieve, create, update, and delete hotel and room records. The API is designed to be used by hotel management systems, booking platforms, and internal admin tools to maintain up-to-date hotel and room data.
+
+Use Case
+--------
+This API is needed to centralize hotel and room data management, enabling seamless integration between booking platforms and hotel property management systems. Typical users include hotel administrators, booking agents, and integration services.
+
+Example scenario:
+A booking platform queries available rooms and hotel details to display to end-users, and administrators update hotel information as needed.
+
+Endpoints
+---------
+
+1. Health Check
+   - GET /api/health
+     Returns API health status.
+     Response Example:
+     {
+       "status": "ok"
+     }
+
+2. Hotels
+   - GET /api/hotels
+     Retrieves a list of all hotels.
+     Response Example:
+     {
+       "count": 2,
+       "items": [
+         {
+           "id": "h1001",
+           "name": "Grand Ocean View",
+           "description": "Luxury seaside hotel with conference facilities",
+           "address": {
+             "street": "123 Seaside Ave",
+             "city": "Santa Marina",
+             "state": "CA",
+             "postalCode": "90210",
+             "country": "USA"
+           },
+           "stars": 5,
+           "phone": "+1-310-555-0143",
+           "amenities": ["pool", "spa", "free-wifi", "gym"]
+         }
+       ]
+     }
+
+   - GET /api/hotels/{hotelId}
+     Retrieves details for a specific hotel.
+     Response Example:
+     {
+       "id": "h1001",
+       "name": "Grand Ocean View",
+       "description": "Luxury seaside hotel with conference facilities",
+       "address": { ... },
+       "stars": 5,
+       "phone": "+1-310-555-0143",
+       "amenities": ["pool", "spa", "free-wifi", "gym"]
+     }
+
+   - POST /api/hotels
+     Creates a new hotel.
+     Request Example:
+     {
+       "name": "Grand Ocean View",
+       "description": "Luxury seaside hotel with conference facilities",
+       "address": { ... },
+       "stars": 5,
+       "phone": "+1-310-555-0143",
+       "amenities": ["pool", "spa", "free-wifi", "gym"]
+     }
+     Response Example:
+     {
+       "id": "h1001",
+       "name": "Grand Ocean View",
+       ...
+     }
+
+   - PUT /api/hotels/{hotelId}
+     Updates an existing hotel.
+     Request Example: (same as POST)
+     Response Example: (updated hotel object)
+
+   - DELETE /api/hotels/{hotelId}
+     Deletes a hotel.
+     Response Example:
+     {
+       "id": "h1001",
+       "message": "h1001 deleted"
+     }
+
+3. Rooms
+   - GET /api/rooms
+     Retrieves a list of all rooms.
+     Response Example:
+     {
+       "count": 2,
+       "items": [
+         {
+           "id": "r2001",
+           "hotelId": "h1001",
+           "number": "101",
+           "type": "Deluxe Sea View",
+           "price": 250,
+           "currency": "USD",
+           "available": true,
+           "amenities": ["king-bed", "balcony", "mini-bar"]
+         }
+       ]
+     }
+
+   - POST /api/rooms
+     Creates a new room.
+     Request Example:
+     {
+       "hotelId": "h1001",
+       "number": "101",
+       "type": "Deluxe Sea View",
+       "price": 250,
+       "currency": "USD",
+       "available": true,
+       "amenities": ["king-bed", "balcony", "mini-bar"]
+     }
+     Response Example:
+     {
+       "id": "r2001",
+       ...
+     }
+
+Required and Non-Required Fields
+-------------------------------
+
+Hotel Object (for POST/PUT /api/hotels)
+| Field        | Type    | Required | Description                              |
+|--------------|---------|----------|------------------------------------------|
+| id           | String  | No       | Unique hotel identifier (auto-generated) |
+| name         | String  | Yes      | Name of the hotel                        |
+| description  | String  | No       | Description of the hotel                 |
+| address      | Object  | Yes      | Address details (see below)              |
+| stars        | Integer | No       | Hotel star rating                        |
+| phone        | String  | No       | Contact phone number                     |
+| amenities    | Array   | No       | List of amenities                        |
+
+Address Object
+| Field      | Type    | Required | Description      |
+|------------|---------|----------|-----------------|
+| street     | String  | Yes      | Street address   |
+| city       | String  | Yes      | City             |
+| state      | String  | No       | State/Province   |
+| postalCode | String  | No       | Postal/ZIP code  |
+| country    | String  | Yes      | Country          |
+
+Room Object (for POST /api/rooms)
+| Field      | Type    | Required | Description               |
+|------------|---------|----------|---------------------------|
+| id         | String  | No       | Unique room identifier    |
+| hotelId    | String  | Yes      | Associated hotel ID       |
+| number     | String  | Yes      | Room number               |
+| type       | String  | Yes      | Room type/description     |
+| price      | Number  | Yes      | Price per night           |
+| currency   | String  | Yes      | Currency code (e.g., USD) |
+| available  | Boolean | Yes      | Availability status       |
+| amenities  | Array   | No       | List of room amenities    |
+
+Basic Architecture
+------------------
+- Client: Sends HTTP requests to the API (e.g., web/mobile app, admin portal).
+- MuleSoft API Gateway: Receives, validates, and routes requests.
+- Mule Flows: Implement business logic, data transformation, and error handling.
+- Backend/Database: (Future) Stores hotel and room data persistently.
+
+Data Types
+----------
+- String: Text values (e.g., name, city, phone)
+- Integer/Number: Numeric values (e.g., stars, price)
+- Boolean: true/false (e.g., available)
+- Array: List of values (e.g., amenities)
+- Object: Nested structure (e.g., address)
+
+Basic Flow
+----------
+1. Client sends an HTTP request to the API endpoint.
+2. MuleSoft receives and routes the request to the appropriate flow.
+3. The flow processes the request, interacts with backend systems or in-memory data, and prepares a response.
+4. MuleSoft returns the response to the client.
+
+Error Handling
+--------------
+- 400 Bad Request: Invalid input or missing required fields.
+- 404 Not Found: Resource does not exist.
+- 405 Method Not Allowed: HTTP method not supported for the endpoint.
+- 406 Not Acceptable: Requested media type is not supported.
+- 415 Unsupported Media Type: Content type is not supported.
+- 500 Internal Server Error: Unexpected server error.
+- 501 Not Implemented: Endpoint or method not implemented.
+
+Assumptions
+-----------
+- All required fields are provided in requests.
+- Data validation is handled upstream or by the client.
+- Only valid hotel and room IDs are used in requests.
+
+Notes & Future Enhancements
+---------------------------
+- Add authentication and authorization.
+- Implement pagination for large hotel/room lists.
+- Add more detailed error messages and codes.
+- Integrate with a persistent backend database.
+
+Additional Information
+---------------------
+**Version:** 1.0.0
+**Base URL:** http://localhost:8081/api
+
+**Content-Type:** application/json
+
+**Authentication:**
+Currently, the API does not require authentication. Future versions may include OAuth2 or API key-based authentication.
+
+**Rate Limiting:**
+No rate limiting is enforced at this time. This may be added in future releases.
+
+**Contact:**
+For support or questions, contact the API team at api-support@example.com.
+
+**Change Log:**
+- 1.0.0: Initial version with hotel and room management endpoints.
+
+**Documentation Last Updated:** April 20, 2026
